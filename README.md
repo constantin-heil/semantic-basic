@@ -13,6 +13,9 @@ The process basically consists of the following steps:
 
  You will need to save your OpenAI API key in a file secretkey.txt in the repos root path.
 
+The enclosed example datafile come from:
+https://www.gutenberg.org/ebooks/15877
+
  ## Usage
 
   1. Activate the vector store
