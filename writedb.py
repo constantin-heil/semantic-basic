@@ -57,6 +57,13 @@ def get_cmdargs() -> dict:
         default = str(100)
     )
     
+    ap.add_argument(
+        "-p",
+        "--dbport",
+        help = "Database port",
+        default = "5432"
+    )
+    
     return vars(ap.parse_args())
 
 if __name__ == "__main__":
@@ -72,10 +79,10 @@ if __name__ == "__main__":
     texts = [txt.replace("\n", "") for txt in texts if len(txt) > 5]
     embs = [get_embeddings(txt) for txt in tqdm(texts)]
 
-    engine = create_engine("postgresql+psycopg2://root:password@localhost:5432/postgres")
+    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdarg["dbport"]}/postgres")
 
     with engine.connect() as c:
-        for i in range(len(embs)):
+        for i, _ in enumerate(embs):
             params = {
                 "insemb": str(embs[i]).replace(" ", ""),
                 "rawtext": texts[i]

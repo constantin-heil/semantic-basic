@@ -30,6 +30,13 @@ def get_cmdargs() -> dict:
         action = "store_true"
     )
     
+    ap.add_argument(
+        "-p",
+        "--dbport",
+        help = "Database port",
+        default = "5432"
+    )
+    
     return vars(ap.parse_args())
 
 def get_embeddings(inp_text: str) -> list:
@@ -129,7 +136,7 @@ if __name__ == "__main__":
     with open(API_SECRET_FN, "r") as fh:
         APIKEY = fh.read().strip()
         
-    engine = create_engine("postgresql+psycopg2://root:password@localhost:5432/postgres")
+    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdarg["dbport"]}/postgres")
     
     with engine.connect() as c:
         result = send_prompt(cmdargs["userprompt"], 10, c, cmdargs["verbose"])
