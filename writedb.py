@@ -1,6 +1,7 @@
 import requests
 from sqlalchemy import create_engine, text
 from tqdm import tqdm
+import spacy
 import argparse
 import json
 
@@ -33,6 +34,20 @@ def get_embeddings(inp_text: str) -> list:
     
     return json.loads(result.content)["data"][0]["embedding"]
 
+def preprocess_text(text: str, nlp: spacy.tokens.doc.Doc) -> str:
+    """Run spacy text preprocessing
+
+    Args:
+        text (str): Input text
+
+    Returns:
+        str: Preprocessed text
+    """
+    doc = nlp(text)
+    toks = [token.lemma_ for token in doc if not token.is_punct and not token.is_stop]
+    return " ".join(toks)
+    
+
 def get_cmdargs() -> dict:
     """Obtain arguments from command line
 
@@ -64,6 +79,14 @@ def get_cmdargs() -> dict:
         default = "5432"
     )
     
+    ap.add_argument(
+        "-r",
+        "--preprocess",
+        help = "Do preprocessing on text",
+        action = "store_true",
+        default = False
+    )
+    
     return vars(ap.parse_args())
 
 if __name__ == "__main__":
@@ -77,9 +100,13 @@ if __name__ == "__main__":
         texts = fh.read().strip().split("\n\n")
     
     texts = [txt.replace("\n", "") for txt in texts if len(txt) > 5]
+    if cmdargs["preprocess"]:
+        nlp = spacy.load("en_core_web_sm")
+        texts = [preprocess_text(txt, nlp) for txt in texts]
+        
     embs = [get_embeddings(txt) for txt in tqdm(texts)]
 
-    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdarg["dbport"]}/postgres")
+    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdargs['dbport']}/postgres")
 
     with engine.connect() as c:
         for i, _ in enumerate(embs):

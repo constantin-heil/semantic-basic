@@ -86,7 +86,9 @@ def send_prompt(userrequest: str, topn: int, con: Connection, verbose: bool) -> 
     """ 
     
     PROMTTEMPLATE2 = """
-    Use only the content of the following list to give answer:
+    Use only the content of the following list to give answer. 
+    Stay within the confines of the information proved by the sentences 
+    in this following list:
     """
     
     qemb = get_embeddings(userrequest)
@@ -136,7 +138,7 @@ if __name__ == "__main__":
     with open(API_SECRET_FN, "r") as fh:
         APIKEY = fh.read().strip()
         
-    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdarg["dbport"]}/postgres")
+    engine = create_engine(f"postgresql+psycopg2://root:password@localhost:{cmdargs['dbport']}/postgres")
     
     with engine.connect() as c:
         result = send_prompt(cmdargs["userprompt"], 10, c, cmdargs["verbose"])

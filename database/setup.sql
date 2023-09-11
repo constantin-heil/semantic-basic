@@ -1,3 +1,4 @@
+\c postgres
 CREATE EXTENSION vector;
 CREATE TABLE embed
 (
